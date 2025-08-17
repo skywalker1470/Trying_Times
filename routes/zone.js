@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Zone = require('../models/Zone');
 const Team = require('../models/Team');
-const Employee = require('../models/Employee');
+const Worker = require('../models/Employee'); // ✅ fixed import
 
 // Get all zones without population
 router.get('/', async (req, res) => {
@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
     }
 
     if (type === 'employee' && !employeeId) {
-      return res.status(400).json({ error: 'Employee ID is required for employee assignment.' });
+      return res.status(400).json({ error: 'Worker ID is required for employee assignment.' });
     }
 
     if (type === 'team' && !teamId) {
@@ -36,12 +36,12 @@ router.post('/', async (req, res) => {
     let assignedName;
 
     if (type === 'employee') {
-      const employee = await Employee.findById(employeeId);
-      if (!employee) {
-        return res.status(404).json({ error: 'Employee not found.' });
+      const worker = await Worker.findById(employeeId);
+      if (!worker) {
+        return res.status(404).json({ error: 'Worker not found.' });
       }
-      assignedTo = employee._id;
-      assignedName = `${employee.firstName} ${employee.lastName}`;
+      assignedTo = worker._id;
+      assignedName = `${worker.firstName} ${worker.lastName}`;
     } else if (type === 'team') {
       const team = await Team.findById(teamId);
       if (!team) {

@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 // @route   POST /api/teams
 // @desc    Create a team
 router.post('/', async (req, res) => {
-  const { name, department: departmentId, employees, supervisor } = req.body;
+  const { name, department: departmentId, workers, supervisor } = req.body;
 
   try {
     // Check if team exists
@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
     team = new Team({
       name,
       department: departmentId,
-      employees: Array.isArray(employees) ? employees : [],
+      workers: Array.isArray(workers) ? workers : [],
       supervisor
     });
 
@@ -80,7 +80,7 @@ router.get('/:id', async (req, res) => {
 // @route   PUT /api/teams/:id
 // @desc    Update a team
 router.put('/:id', async (req, res) => {
-  const { name, department: departmentId, employees, supervisor } = req.body;
+  const { name, department: departmentId, workers, supervisor } = req.body;
 
   try {
     let team = await Team.findById(req.params.id);
@@ -99,7 +99,7 @@ router.put('/:id', async (req, res) => {
     // Update team fields
     team.name = name || team.name;
     team.department = departmentId || team.department;
-    team.employees = Array.isArray(employees) ? employees : team.employees;
+    team.workers = Array.isArray(workers) ? workers : team.workers;
     team.supervisor = supervisor || team.supervisor;
 
     await team.save();
