@@ -15,19 +15,19 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Routes
-const employeeRoutes = require('./routes/employees');
+const employeeRoutes = require('./routes/workers');
 const zoneRoutes = require('./routes/zone');
 const departmentRoutes = require('./routes/department');
 const teamRoutes = require('./routes/team');
 
-app.use('/api/employees', employeeRoutes);
+app.use('/api/workers', employeeRoutes);
 app.use('/api/zones', zoneRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/teams', teamRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
-  res.send('✅ Employee & Zone Management API is running');
+  res.send('✅ Worker & Zone Management API is running');
 });
 
 // Error handling middleware

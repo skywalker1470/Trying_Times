@@ -1,7 +1,7 @@
 {
   "name": "ems",
   "version": "1.0.0",
-  "description": "Employee & Zone Management API",
+  "description": "Worker & Zone Management API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
