@@ -17,7 +17,7 @@ const zoneSchema = new mongoose.Schema({
   // For employee assignments
   employee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Employee',
+    ref: 'Worker',
     required: function() {
       return this.type === 'employee';
     }

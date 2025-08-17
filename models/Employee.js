@@ -93,6 +93,6 @@ employeeSchema.pre('save', function(next) {
   next();
 });
 
-const Employee = mongoose.model('Employee', employeeSchema);
+const Worker = mongoose.model('Worker', employeeSchema, 'workers');
 
-module.exports = Employee;
+module.exports = Worker;

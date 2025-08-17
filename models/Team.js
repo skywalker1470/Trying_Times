@@ -12,7 +12,7 @@ const teamSchema = new mongoose.Schema({
     ref: 'Department',
     required: true
   },
-  employees: [{
+  workers: [{
     type: String,
     required: true
   }],
