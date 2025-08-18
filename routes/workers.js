@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
-const Worker = require('../models/Employee'); // ✅ fixed import
+const Worker = require('../models/Employee'); 
 const Department = require('../models/Department');
-const Team = require('../models/Team');
 
 const allowedRoles = ["admin", "manager", "employee"];
 
@@ -16,17 +15,14 @@ router.post('/', async (req, res) => {
       department, position, status, address, emergencyContact, skills, role
     } = req.body;
 
-    // Basic validation (department is optional)
     if (!employeeId || !firstName || !lastName || !email || !position || !role) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Validate role
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ error: 'Invalid role value' });
     }
 
-    // Validate department if provided
     if (department) {
       if (!mongoose.Types.ObjectId.isValid(department)) {
         return res.status(400).json({ error: 'Invalid department ID format' });
@@ -37,7 +33,6 @@ router.post('/', async (req, res) => {
       }
     }
 
-    // Check if employeeId or email already exists
     const existingWorker = await Worker.findOne({
       $or: [{ employeeId }, { email }]
     });
@@ -66,8 +61,7 @@ router.post('/', async (req, res) => {
     await worker.save();
 
     const savedWorker = await Worker.findById(worker._id)
-      .populate('department', 'name')
-      .populate('team', 'name');
+      .populate('department', 'name'); // ✅ removed team populate
 
     res.status(201).json(savedWorker);
 
@@ -81,7 +75,6 @@ router.post('/', async (req, res) => {
 });
 
 // @route   PUT /api/workers/:id
-// @desc    Update worker details, department optional
 router.put('/:id', async (req, res) => {
   try {
     const updates = { ...req.body };
@@ -108,8 +101,7 @@ router.put('/:id', async (req, res) => {
       req.params.id,
       { ...updates, updatedAt: Date.now() },
       { new: true, runValidators: true }
-    ).populate('department', 'name')
-     .populate('team', 'name');
+    ).populate('department', 'name'); // ✅ removed team populate
 
     if (!worker) {
       return res.status(404).json({ error: 'Worker not found' });
@@ -125,21 +117,20 @@ router.put('/:id', async (req, res) => {
 });
 
 // @route   GET /api/workers
-// @desc    Get all workers with populated department and team info
 router.get('/', async (req, res) => {
   try {
     const workers = await Worker.find({})
+      .populate('department', 'name') // ✅ populate department only
       .sort({ lastName: 1, firstName: 1 });
 
     const formattedWorkers = workers.map(emp => ({
       id: emp._id,
       employeeId: emp.employeeId,
-      name: `${emp.firstName} ${emp.lastName}`,
+      name: emp.fullName, // ✅ uses virtual
       email: emp.email,
       phone: emp.phone,
       position: emp.position,
-      department: emp.department ? emp.department : 'Not assigned',
-      team: emp.team ? emp.team : 'Not assigned',
+      department: emp.department ? emp.department.name : 'Not assigned',
       status: emp.status,
       role: emp.role
     }));
@@ -152,12 +143,10 @@ router.get('/', async (req, res) => {
 });
 
 // @route   GET /api/workers/:id
-// @desc    Get a single worker by ID with populated department and team info
 router.get('/:id', async (req, res) => {
   try {
     const worker = await Worker.findById(req.params.id)
-      .populate('department', 'name')
-      .populate('team', 'name');
+      .populate('department', 'name'); // ✅ removed team populate
     if (!worker) {
       return res.status(404).json({ error: 'Worker not found' });
     }
