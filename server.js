@@ -19,13 +19,11 @@ const employeeRoutes = require('./routes/workers');
 const zoneRoutes = require('./routes/zone');
 const departmentRoutes = require('./routes/department');
 const teamRoutes = require('./routes/team');
-const employeeRoutes = require('./routes/employeeRoutes');
 
 app.use('/api/workers', employeeRoutes);
 app.use('/api/zones', zoneRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/teams', teamRoutes);
-app.use('/api/employees', employeeRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
