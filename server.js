@@ -4,7 +4,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 const app = express();
-const PORT = 5000; // Always on 5000
+const PORT = 5000;
 
 // Connect to MongoDB
 connectDB();
@@ -14,18 +14,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Routes
+// Import routes
 const employeeRoutes = require('./routes/workers');
-const zoneRoutes = require('./routes/zone');
+const zoneRoutes = require('./routes/zone');       // merged zone route with sync
 const departmentRoutes = require('./routes/department');
 const teamRoutes = require('./routes/team');
 
+// Mount routes
 app.use('/api/workers', employeeRoutes);
-app.use('/api/zones', zoneRoutes);
+app.use('/api/zones', zoneRoutes);    // Zones and sync routes here
 app.use('/api/departments', departmentRoutes);
 app.use('/api/teams', teamRoutes);
 
-// Basic route
+// Basic root route
 app.get('/', (req, res) => {
   res.send('✅ Worker & Zone Management API is running');
 });
@@ -36,14 +37,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// Start server
 const server = app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections gracefully
 process.on('unhandledRejection', (err) => {
   console.error(`❌ Error: ${err.message}`);
-  // Close server & exit process
   server.close(() => process.exit(1));
 });
-

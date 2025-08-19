@@ -1,314 +1,149 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Zone Management System</title>
+  <meta charset="UTF-8" />
+  <title>Assign Task to Zone and Team</title>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      max-width: 1000px; 
-      margin: 0 auto; 
-      padding: 20px; 
-      line-height: 1.6;
-    }
-    .section { 
-      margin-bottom: 30px; 
-      padding: 20px; 
-      border: 1px solid #ddd; 
-      border-radius: 5px; 
-    }
-    input, select, button { 
-      margin: 5px; 
-      padding: 8px; 
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    button { 
-      cursor: pointer; 
-      background: #4CAF50; 
-      color: white; 
-      border: none; 
-      padding: 8px 15px;
-    }
-    button:hover { 
-      background: #45a049; 
-    }
-    .error { 
-      color: #e74c3c; 
-      margin: 10px 0; 
-      padding: 10px;
-      background: #fde8e7;
-      border-radius: 4px;
-    }
-    .success { 
-      color: #27ae60; 
-      margin: 10px 0;
-      padding: 10px;
-      background: #e8f8f0;
-      border-radius: 4px;
-    }
-    .zone-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .zone-card {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 15px;
-      background: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .zone-card h3 {
-      margin-top: 0;
-      color: #2c3e50;
-    }
-    .zone-actions {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-    }
-    .zone-actions button {
-      flex: 1;
-    }
-    .item-selector {
-      margin: 15px 0;
-      padding: 15px;
-      border: 1px solid #e0e0e0;
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
       border-radius: 8px;
       background: #f9f9f9;
     }
-    .radio-container {
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 4px;
-      background: white;
+    label {
+      display: block;
+      margin-top: 15px;
     }
-    .selector-header {
-      margin-bottom: 15px;
-    }
-    .selector-actions {
-      display: flex;
-      gap: 10px;
-      margin: 10px 0;
-    }
-    .item {
-      display: flex;
-      align-items: center;
+    select, input {
+      width: 100%;
       padding: 8px;
-      margin: 4px 0;
-      border-radius: 4px;
-      transition: all 0.2s;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
       cursor: pointer;
+      font-size: 16px;
+      border-radius: 4px;
     }
-    
-    .item:hover {
-      background: #f0f0f0;
+    button:hover {
+      background: #0056b3;
     }
-    
-    .item input[type="radio"] {
-      margin-right: 10px;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #666;
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>Zone Management</h1>
+  <h2>Assign Task to Zone and Team</h2>
+  <form id="assignForm">
+    <label for="zoneSelect">Select Zone:</label>
+    <select id="zoneSelect" required>
+      <option value="">Loading zones...</option>
+    </select>
 
-  <div class="section">
-    <h2>Assign Zone</h2>
+    <label for="teamSelect">Select Team:</label>
+    <select id="teamSelect" required>
+      <option value="">Loading teams...</option>
+    </select>
 
-    <div class="item-selector" id="selectionContainer" style="margin: 15px 0; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px;">
-      <div class="loading">Loading...</div>
-    </div>
+    <label for="taskInput">Task:</label>
+    <input type="text" id="taskInput" placeholder="Enter task" required />
 
-    <div style="margin: 20px 0;">
-      <label for="zoneVal">
-        <strong>Zone Name:</strong>
-        <input type="text" id="zoneVal" placeholder="Enter zone name" style="width: 200px; margin-left: 10px;">
-      </label>
-    </div>
+    <button type="submit">Assign Task</button>
+  </form>
 
-    <button onclick="assignZone()" style="padding: 10px 20px; font-size: 16px;">Assign Zone</button>
-    <div id="message"></div>
-  </div>
-
-  <div class="section">
-    <h2>Current Zone Assignments</h2>
-    <div id="zoneList" class="zone-grid">
-      <!-- Zone cards will be inserted here -->
-    </div>
-  </div>
+  <div id="message"></div>
 
   <script>
-    const ZAPI = 'http://localhost:5000/api/zones';
-    let allItems = [];
-
-    // We only assign zones to teams now
-    const currentType = 'team';
-
-    // Load teams for selection
-    async function loadItems() {
-      const container = document.getElementById('selectionContainer');
-      container.innerHTML = '<div class="loading">Loading...</div>';
-
-      try {
-        const res = await fetch('http://localhost:5000/api/teams');
-        const teams = await res.json();
-
-        allItems = teams.map(team => ({
-          id: team._id,
-          name: team.name || `Team ${team._id}`,
-          type: 'team'
-        }));
-
-        container.innerHTML = `
-          <div class="selector-header">
-            <h3>Select Team</h3>
-            <input type="text" id="itemSearch" placeholder="Search teams..." 
-                   style="width: 100%; padding: 8px; margin-bottom: 10px;">
-          </div>
-          <div id="teamRadioContainer" class="radio-container">
-            ${allItems.map(item => `
-              <label class="item">
-                <input type="radio" name="selectedItem" value="${item.id}" data-type="${item.type}">
-                ${item.name}
-              </label>
-            `).join('')}
-          </div>
-        `;
-
-        document.getElementById('itemSearch').addEventListener('input', filterItems);
-      } catch (err) {
-        container.innerHTML = `<div class="error">Failed to load teams</div>`;
-        console.error(err);
-      }
-    }
-
-    // Filter teams
-    function filterItems() {
-      const searchTerm = document.getElementById('itemSearch').value.toLowerCase();
-      const items = document.querySelectorAll('#teamRadioContainer .item');
-
-      items.forEach(item => {
-        const name = item.textContent.toLowerCase();
-        item.style.display = name.includes(searchTerm) ? 'flex' : 'none';
-      });
-    }
-
-    function showMessage(message, isError = false) {
-      const msgDiv = document.getElementById('message');
-      msgDiv.className = isError ? 'error' : 'success';
-      msgDiv.textContent = message;
-      setTimeout(() => msgDiv.textContent = '', 5000);
-    }
-
-    async function assignZone() {
-      const selectedItem = document.querySelector('input[name="selectedItem"]:checked');
-      const zone = document.getElementById('zoneVal').value.trim();
-
-      if (!selectedItem || !zone) {
-        showMessage('Please select a team and enter a zone name', true);
-        return;
-      }
-
-      const itemId = selectedItem.value;
-
-      try {
-        const requestBody = {
-          zone: zone,
-          type: 'team',
-          teamId: itemId
-        };
-
-        const response = await fetch(ZAPI, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to assign zone');
-        }
-
-        document.getElementById('zoneVal').value = '';
-        selectedItem.checked = false;
-
-        showMessage('Zone assigned successfully!');
-        loadZones();
-      } catch (err) {
-        showMessage(err.message || 'Error assigning zone', true);
-        console.error(err);
-      }
-    }
-
-    async function unassignZone(zoneId) {
-      if (!confirm('Are you sure you want to unassign this zone?')) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${ZAPI}/${zoneId}`, {
-          method: 'DELETE'
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to unassign zone');
-        }
-
-        showMessage('Zone unassigned successfully!');
-        loadZones();
-      } catch (err) {
-        showMessage(err.message || 'Error unassigning zone', true);
-        console.error(err);
-      }
-    }
+    const API_BASE = 'http://localhost:5000/api';
 
     async function loadZones() {
       try {
-        const res = await fetch(ZAPI);
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.error || 'Failed to load zones');
-        }
-
+        const res = await fetch(`${API_BASE}/zones`);
         const zones = await res.json();
-        const container = document.getElementById('zoneList');
-
-        if (!zones || zones.length === 0) {
-          container.innerHTML = '<p>No zone assignments found</p>';
-          return;
-        }
-
-        container.innerHTML = zones.map(zone => `
-          <div class="zone-card">
-            <h3>${zone.assignedName || 'Unnamed'}</h3>
-            <p><strong>Type:</strong> ${zone.type}</p>
-            <p><strong>Assigned Zone:</strong> ${zone.name}</p>
-            <p><small>Assigned: ${new Date(zone.assignedAt).toLocaleString()}</small></p>
-            <div class="zone-actions">
-              <button onclick="unassignZone('${zone._id || zone.id}')" style="background: #e74c3c;">Unassign</button>
-            </div>
-          </div>
-        `).join('');
+        const zoneSelect = document.getElementById('zoneSelect');
+        zoneSelect.innerHTML = '<option value="">-- Select a Zone --</option>';
+        zones.forEach(zone => {
+          const option = document.createElement('option');
+          option.value = zone.name;  // zone.name comes from officeName in your backend
+          option.textContent = zone.name;
+          zoneSelect.appendChild(option);
+        });
       } catch (err) {
-        showMessage('Failed to load zone assignments', true);
-        console.error(err);
+        console.error('Failed to load zones:', err);
+        document.getElementById('message').textContent = 'Failed to load zones';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadItems();
+    async function loadTeams() {
+      try {
+        const res = await fetch(`${API_BASE}/teams`);
+        const teams = await res.json();
+        const teamSelect = document.getElementById('teamSelect');
+        teamSelect.innerHTML = '<option value="">-- Select a Team --</option>';
+        teams.forEach(team => {
+          const option = document.createElement('option');
+          option.value = team._id;
+          option.textContent = team.name;
+          teamSelect.appendChild(option);
+        });
+      } catch (err) {
+        console.error('Failed to load teams:', err);
+        document.getElementById('message').textContent = 'Failed to load teams';
+      }
+    }
+
+    document.getElementById('assignForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const zoneName = document.getElementById('zoneSelect').value;
+      const teamId = document.getElementById('teamSelect').value;
+      const task = document.getElementById('taskInput').value.trim();
+      const messageDiv = document.getElementById('message');
+
+      if (!zoneName || !teamId || !task) {
+        messageDiv.textContent = 'Please select a zone, a team, and enter a task.';
+        messageDiv.style.color = 'red';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/zones`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: zoneName,
+            team: teamId,
+            task: task
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to assign task');
+        }
+
+        messageDiv.textContent = 'Task assigned successfully!';
+        messageDiv.style.color = 'green';
+        e.target.reset();
+      } catch (err) {
+        console.error('Error assigning task:', err);
+        messageDiv.textContent = 'Error: ' + err.message;
+        messageDiv.style.color = 'red';
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
       loadZones();
+      loadTeams();
     });
   </script>
 </body>
