@@ -19,12 +19,14 @@ const employeeRoutes = require('./routes/workers');
 const zoneRoutes = require('./routes/zone');       // merged zone route with sync
 const departmentRoutes = require('./routes/department');
 const teamRoutes = require('./routes/team');
+const seeTasksRoute = require('./routes/seeTasksRoute');
 
 // Mount routes
 app.use('/api/workers', employeeRoutes);
 app.use('/api/zones', zoneRoutes);    // Zones and sync routes here
 app.use('/api/departments', departmentRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/tasks', seeTasksRoute);
 
 // Basic root route
 app.get('/', (req, res) => {

@@ -20,14 +20,6 @@ const zoneSchema = new mongoose.Schema({
   assignedAt: {
     type: Date,
     default: Date.now
-  },
-  lat: {
-    type: Number,
-    default: null
-  },
-  lng: {
-    type: Number,
-    default: null
   }
 }, { timestamps: true });
 

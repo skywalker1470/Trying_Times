@@ -64,56 +64,81 @@
   <div id="message"></div>
 
   <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0XhDJLbzrTNJyUZGkPnqEbjO2v9ZVohdFhqI_JwIY9pukCJ0NswTAGmnFhHKB_MW-/exec';
     const API_BASE = 'http://localhost:5000/api';
 
     async function loadZones() {
       try {
-        const res = await fetch(`${API_BASE}/zones`);
-        const zones = await res.json();
+        const res = await fetch(APPS_SCRIPT_URL);
+        if (!res.ok) throw new Error('Failed to load zones');
+        const data = await res.json();
+        const zones = data.offices;
+
         const zoneSelect = document.getElementById('zoneSelect');
+        if (!zones || zones.length === 0) {
+          zoneSelect.innerHTML = '<option value="">No zones available</option>';
+          return;
+        }
+
         zoneSelect.innerHTML = '<option value="">-- Select a Zone --</option>';
         zones.forEach(zone => {
-          const option = document.createElement('option');
-          option.value = zone.name;  // zone.name comes from officeName in your backend
-          option.textContent = zone.name;
-          zoneSelect.appendChild(option);
+          if (zone.officeName) {
+            const option = document.createElement('option');
+            option.value = zone.officeName.trim();
+            option.textContent = zone.officeName;
+            zoneSelect.appendChild(option);
+          }
         });
       } catch (err) {
         console.error('Failed to load zones:', err);
-        document.getElementById('message').textContent = 'Failed to load zones';
+        const zoneSelect = document.getElementById('zoneSelect');
+        zoneSelect.innerHTML = '<option value="">Failed to load zones</option>';
       }
     }
 
     async function loadTeams() {
       try {
         const res = await fetch(`${API_BASE}/teams`);
+        if (!res.ok) throw new Error('Failed to load teams');
         const teams = await res.json();
+
         const teamSelect = document.getElementById('teamSelect');
+        if (!teams || teams.length === 0) {
+          teamSelect.innerHTML = '<option value="">No teams available</option>';
+          return;
+        }
+
         teamSelect.innerHTML = '<option value="">-- Select a Team --</option>';
         teams.forEach(team => {
           const option = document.createElement('option');
-          option.value = team._id;
+          option.value = team._id.trim();
           option.textContent = team.name;
           teamSelect.appendChild(option);
         });
       } catch (err) {
         console.error('Failed to load teams:', err);
-        document.getElementById('message').textContent = 'Failed to load teams';
+        const teamSelect = document.getElementById('teamSelect');
+        teamSelect.innerHTML = '<option value="">Failed to load teams</option>';
       }
     }
 
     document.getElementById('assignForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const zoneName = document.getElementById('zoneSelect').value;
-      const teamId = document.getElementById('teamSelect').value;
+
+      const zoneName = document.getElementById('zoneSelect').value.trim();
+      const teamId = document.getElementById('teamSelect').value.trim();
       const task = document.getElementById('taskInput').value.trim();
       const messageDiv = document.getElementById('message');
+      const submitButton = e.target.querySelector('button[type="submit"]');
 
       if (!zoneName || !teamId || !task) {
         messageDiv.textContent = 'Please select a zone, a team, and enter a task.';
         messageDiv.style.color = 'red';
         return;
       }
+
+      submitButton.disabled = true;
+      messageDiv.textContent = '';
 
       try {
         const response = await fetch(`${API_BASE}/zones`, {
@@ -127,8 +152,14 @@
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to assign task');
+          let errorMsg = '';
+          try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || JSON.stringify(errorData);
+          } catch {
+            errorMsg = await response.text();
+          }
+          throw new Error(errorMsg || 'Failed to assign task');
         }
 
         messageDiv.textContent = 'Task assigned successfully!';
@@ -138,6 +169,8 @@
         console.error('Error assigning task:', err);
         messageDiv.textContent = 'Error: ' + err.message;
         messageDiv.style.color = 'red';
+      } finally {
+        submitButton.disabled = false;
       }
     });
 
