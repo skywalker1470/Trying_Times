@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
-const Worker = require('../models/Employee'); 
+const Worker = require('../models/Employee');
 const Department = require('../models/Department');
+
+const auth = require('../middleware/auth'); // <-- Your JWT middleware
 
 const allowedRoles = ["admin", "manager", "employee"];
 
 // @route   POST /api/workers
-// @desc    Create a new worker, department optional
-router.post('/', async (req, res) => {
+// @desc    Create a new worker, department optional (admin only)
+router.post('/', auth(['admin']), async (req, res) => {
   try {
     const {
       employeeId, firstName, lastName, email, phone,
@@ -61,7 +63,7 @@ router.post('/', async (req, res) => {
     await worker.save();
 
     const savedWorker = await Worker.findById(worker._id)
-      .populate('department', 'name'); // ✅ removed team populate
+      .populate('department', 'name');
 
     res.status(201).json(savedWorker);
 
@@ -75,10 +77,10 @@ router.post('/', async (req, res) => {
 });
 
 // @route   PUT /api/workers/:id
-router.put('/:id', async (req, res) => {
+// @desc    Update worker (admin only)
+router.put('/:id', auth(['admin']), async (req, res) => {
   try {
     const updates = { ...req.body };
-
     delete updates.employeeId;
     delete updates.email;
     delete updates.createdAt;
@@ -101,7 +103,7 @@ router.put('/:id', async (req, res) => {
       req.params.id,
       { ...updates, updatedAt: Date.now() },
       { new: true, runValidators: true }
-    ).populate('department', 'name'); // ✅ removed team populate
+    ).populate('department', 'name');
 
     if (!worker) {
       return res.status(404).json({ error: 'Worker not found' });
@@ -116,17 +118,31 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// @route   DELETE /api/workers/:id
+// @desc    Delete worker (admin only)
+router.delete('/:id', auth(['admin']), async (req, res) => {
+  try {
+    const deleted = await Worker.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Worker not found' });
+    res.json({ message: 'Worker deleted' });
+  } catch (error) {
+    console.error('Error deleting worker:', error);
+    res.status(500).json({ error: 'Failed to delete worker' });
+  }
+});
+
 // @route   GET /api/workers
-router.get('/', async (req, res) => {
+// @desc    Get all workers (admin and manager only)
+router.get('/', auth(['admin', 'manager']), async (req, res) => {
   try {
     const workers = await Worker.find({})
-      .populate('department', 'name') // ✅ populate department only
+      .populate('department', 'name')
       .sort({ lastName: 1, firstName: 1 });
 
     const formattedWorkers = workers.map(emp => ({
       id: emp._id,
       employeeId: emp.employeeId,
-      name: emp.fullName, // ✅ uses virtual
+      name: emp.fullName, // uses virtual
       email: emp.email,
       phone: emp.phone,
       position: emp.position,
@@ -143,10 +159,11 @@ router.get('/', async (req, res) => {
 });
 
 // @route   GET /api/workers/:id
-router.get('/:id', async (req, res) => {
+// @desc    Get a single worker (admin and manager only)
+router.get('/:id', auth(['admin', 'manager']), async (req, res) => {
   try {
     const worker = await Worker.findById(req.params.id)
-      .populate('department', 'name'); // ✅ removed team populate
+      .populate('department', 'name');
     if (!worker) {
       return res.status(404).json({ error: 'Worker not found' });
     }

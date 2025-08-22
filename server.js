@@ -13,6 +13,8 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 
 // Import routes
 const employeeRoutes = require('./routes/workers');
@@ -20,8 +22,11 @@ const zoneRoutes = require('./routes/zone');       // merged zone route with syn
 const departmentRoutes = require('./routes/department');
 const teamRoutes = require('./routes/team');
 const seeTasksRoute = require('./routes/seeTasksRoute');
+const checkinRoutes = require('./routes/checkin');
+const approvalRoutes = require('./routes/approval');
 
-// Mount routes
+app.use('/api/checkin', checkinRoutes);
+app.use('/api/checkin/approval', approvalRoutes);
 app.use('/api/workers', employeeRoutes);
 app.use('/api/zones', zoneRoutes);    // Zones and sync routes here
 app.use('/api/departments', departmentRoutes);
