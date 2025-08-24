@@ -12,10 +12,9 @@ const zoneSchema = new mongoose.Schema({
     ref: 'Team',
     default: null
   },
-  task: {
-    type: String,
-    trim: true,
-    default: ''
+  tasks: {
+    type: [String],   // ✅ new field for tasks array
+    default: []
   },
   assignedAt: {
     type: Date,
