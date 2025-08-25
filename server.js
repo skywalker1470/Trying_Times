@@ -4,52 +4,53 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// ✅ Connect to MongoDB
 connectDB();
 
-// Middleware
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
 
-// Import routes
+// ✅ Import routes
+const authRoutes = require('./routes/auth');
 const employeeRoutes = require('./routes/workers');
-const zoneRoutes = require('./routes/zone');       // merged zone route with sync
+const zoneRoutes = require('./routes/zone');
 const departmentRoutes = require('./routes/department');
 const teamRoutes = require('./routes/team');
-//const seeTasksRoute = require('./routes/seeTasksRoute');
 const checkinRoutes = require('./routes/checkin');
+const checkoutRoutes = require('./routes/checkout');
 const approvalRoutes = require('./routes/approval');
 
-app.use('/api/checkin', checkinRoutes);
-app.use('/api/checkin/approval', approvalRoutes);
+// ✅ Mount routes
+app.use('/api/auth', authRoutes);
 app.use('/api/workers', employeeRoutes);
-app.use('/api/zones', zoneRoutes);    // Zones and sync routes here
+app.use('/api/zones', zoneRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/teams', teamRoutes);
-//app.use('/api/tasks', seeTasksRoute);
+app.use('/api/checkin', checkinRoutes);
+app.use('/api/checkin/approval', approvalRoutes);
+app.use('/api/checkout', checkoutRoutes);   // ✅ FIXED (was mounted wrong earlier)
 
-// Basic root route
+// ✅ Basic root route
 app.get('/', (req, res) => {
   res.send('✅ Worker & Zone Management API is running');
 });
 
-// Error handling middleware
+// ✅ Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start server
+// ✅ Start server
 const server = app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
 
-// Handle unhandled promise rejections gracefully
+// ✅ Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error(`❌ Error: ${err.message}`);
   server.close(() => process.exit(1));
