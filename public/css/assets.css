@@ -1,0 +1,264 @@
+/* Assets List Page Styles */
+.assets-container {
+  max-width: 1000px;
+  margin: 30px auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 32px 40px 40px 40px;
+}
+
+.assets-header {
+  color: #2c3e50;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.assets-header h1 {
+  margin: 0;
+}
+
+.assets-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  border-radius: 6px;
+  background: #f9fbfd;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.assets-section-title {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+/* Form Styles */
+.asset-form {
+  margin-bottom: 24px;
+  background: #f2f6fa;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px 15px -10px;
+}
+
+.form-group {
+  flex: 1 1 200px;
+  padding: 0 10px;
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #bfc9d1;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.form-actions {
+  margin-top: 15px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.2s;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #217dbb;
+}
+
+.btn-warning {
+  background: #f39c12;
+  color: #fff;
+}
+
+.btn-warning:hover {
+  background: #d35400;
+}
+
+.btn-secondary {
+  background: #95a5a6;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background: #7f8c8d;
+}
+
+/* Asset List Styles */
+.asset-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.asset-item {
+  background: #eaf1fb;
+  margin-bottom: 12px;
+  padding: 15px;
+  border-radius: 4px;
+  color: #34495e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.asset-item:hover {
+  background: #d6e4f7;
+}
+
+.asset-details {
+  flex: 1;
+}
+
+.asset-name {
+  font-weight: 600;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+.asset-meta {
+  font-size: 0.9em;
+  color: #7f8c8d;
+}
+
+.asset-id {
+  color: #888;
+  font-size: 0.85em;
+}
+
+.asset-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Edit Form Styles */
+.edit-form {
+  display: none;
+  background: #fffbe7;
+  padding: 15px;
+  border-radius: 4px;
+  border: 1px solid #ffe08a;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.edit-form.active {
+  display: block;
+}
+
+.edit-form .form-row {
+  margin: 0 0 10px 0;
+}
+
+.edit-form .form-group {
+  padding: 0 5px;
+}
+
+/* Quantity Control Styles */
+.quantity-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.quantity-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-buttons input {
+  width: 60px;
+  text-align: center;
+}
+
+/* Table Styles */
+.assets-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.assets-table th,
+.assets-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.assets-table th {
+  background: #3498db;
+  color: #fff;
+  font-weight: 600;
+}
+
+.assets-table tr:nth-child(even) {
+  background: #f2f6fa;
+}
+
+.assets-table tr:hover {
+  background: #eaf1fb;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .assets-container {
+    margin: 15px;
+    padding: 20px;
+  }
+  
+  .asset-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .asset-actions {
+    margin-top: 10px;
+    align-self: flex-end;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+}

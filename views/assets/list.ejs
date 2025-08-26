@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assets Inventory</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/assets.css">
+</head>
+<body>
+  <div class="assets-container">
+    <header class="assets-header">
+      <h1>Assets Inventory Management</h1>
+      <a href="/" class="btn btn-secondary">Back to Main</a>
+    </header>
+
+    <!-- Add New Asset Form -->
+    <section class="assets-section">
+      <h2 class="assets-section-title">Add New Asset</h2>
+      <form class="asset-form" action="/assets/create" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assetName">Asset Name</label>
+            <input type="text" id="assetName" name="name" placeholder="Enter asset name" required>
+          </div>
+          <div class="form-group">
+            <label for="assetPrice">Price ($)</label>
+            <input type="number" id="assetPrice" name="price" placeholder="Enter price" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="assetQuantity">Quantity</label>
+            <input type="number" id="assetQuantity" name="quantity" placeholder="Enter quantity" required>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add Asset</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Current Assets List -->
+    <section class="assets-section">
+      <h2 class="assets-section-title">Current Inventory</h2>
+      <% if (assets && assets.length > 0) { %>
+        <ul class="asset-list">
+          <% assets.forEach(asset => { %>
+            <li class="asset-item">
+              <div class="asset-details">
+                <div class="asset-name"><%= asset.name %></div>
+                <div class="asset-meta">
+                  ID: <span class="asset-id"><%= asset._id %></span> | 
+                  Price: $<%= asset.price %> | 
+                  Quantity: <%= asset.quantity %>
+                </div>
+              </div>
+              <div class="asset-actions">
+                <button class="btn btn-warning" onclick="showEditForm('<%= asset._id %>')">Edit</button>
+              </div>
+              
+              <!-- Edit Asset Form -->
+              <form id="edit-form-<%= asset._id %>" class="edit-form" action="/assets/edit/<%= asset._id %>" method="POST">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="editName<%= asset._id %>">Name</label>
+                    <input type="text" id="editName<%= asset._id %>" name="name" value="<%= asset.name %>" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="editPrice<%= asset._id %>">Price ($)</label>
+                    <input type="number" id="editPrice<%= asset._id %>" name="price" value="<%= asset.price %>" step="0.01" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="editQuantity<%= asset._id %>">Quantity</label>
+                    <input type="number" id="editQuantity<%= asset._id %>" name="quantity" value="<%= asset.quantity %>" required>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                  <button type="button" class="btn btn-secondary" onclick="hideEditForm('<%= asset._id %>')">Cancel</button>
+                </div>
+              </form>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p>No assets found in inventory.</p>
+      <% } %>
+    </section>
+
+    <!-- Assign Asset Form -->
+    <section class="assets-section">
+      <h2 class="assets-section-title">Assign Asset to Employee</h2>
+      <% if (assets && assets.length > 0 && employees && employees.length > 0) { %>
+        <form class="asset-form" action="/assets/assign" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="assetSelect">Asset</label>
+              <select id="assetSelect" name="assetId" required>
+                <% assets.forEach(asset => { %>
+                  <option value="<%= asset._id %>"><%= asset.name %> (Available: <%= asset.quantity %>)</option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="employeeSelect">Employee</label>
+              <select id="employeeSelect" name="employeeId" required>
+                <% employees.forEach(emp => { %>
+                  <option value="<%= emp._id %>"><%= emp.name %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assignmentMonth">Month</label>
+              <input type="month" id="assignmentMonth" name="month" required>
+            </div>
+            <div class="form-group">
+              <label for="assignmentQuantity">Quantity</label>
+              <input type="number" id="assignmentQuantity" name="quantity" min="1" value="1" required>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Assign Asset</button>
+          </div>
+        </form>
+      <% } else { %>
+        <p>Cannot assign assets. Please ensure you have both assets and employees in the system.</p>
+      <% } %>
+    </section>
+
+      <!-- Existing Rented -->
+      <section class="assets-section">
+        <h2 class="assets-section-title">Existing Rented</h2>
+        <% if (assignments && assignments.length > 0) { %>
+          <ul class="asset-list">
+            <% assignments.forEach(assign => { %>
+              <li class="asset-item">
+                <form class="edit-form active" action="/assets/rented/edit/<%= assign._id %>" method="POST" onsubmit="return true;">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="assetSelect<%= assign._id %>">Asset</label>
+                      <select id="assetSelect<%= assign._id %>" name="assetId" required>
+                        <% assets.forEach(asset => { %>
+                          <option value="<%= asset._id %>" <%= asset._id.toString() === assign.asset._id.toString() ? 'selected' : '' %>><%= asset.name %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="employeeSelect<%= assign._id %>">Employee</label>
+                      <select id="employeeSelect<%= assign._id %>" name="employeeId" required>
+                        <% employees.forEach(emp => { %>
+                          <option value="<%= emp._id %>" <%= emp._id.toString() === assign.employee._id.toString() ? 'selected' : '' %>><%= emp.name %></option>
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="monthInput<%= assign._id %>">Month</label>
+                      <input type="month" id="monthInput<%= assign._id %>" name="month" value="<%= assign.month %>" required>
+                    </div>
+                    <div class="form-group quantity-control">
+                      <label>Quantity</label>
+                      <div class="quantity-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="decrementQuantity('<%= assign._id %>')">-</button>
+                        <input type="number" id="quantityInput<%= assign._id %>" name="quantity" value="<%= assign.quantity %>" min="0" readonly>
+                        <button type="button" class="btn btn-secondary" onclick="incrementQuantity('<%= assign._id %>')">+</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="confirmDelete('<%= assign._id %>')">Delete</button>
+                  </div>
+                </form>
+                <form id="delete-form-<%= assign._id %>" action="/assets/rented/delete/<%= assign._id %>" method="POST" style="display:none;"></form>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p>No rented assignments found.</p>
+        <% } %>
+      </section>
+  </div>
+
+  <script>
+    // Show edit form for a specific asset
+    function showEditForm(assetId) {
+      // Hide all edit forms first
+      document.querySelectorAll('.edit-form').forEach(form => {
+        form.classList.remove('active');
+      });
+      
+      // Show the specific edit form
+      const editForm = document.getElementById('edit-form-' + assetId);
+      if (editForm) {
+        editForm.classList.add('active');
+      }
+    }
+    
+    // Hide edit form for a specific asset
+    function hideEditForm(assetId) {
+      const editForm = document.getElementById('edit-form-' + assetId);
+      if (editForm) {
+        editForm.classList.remove('active');
+      }
+    }
+    
+    // Increment quantity
+    function incrementQuantity(assetId) {
+      const quantityInput = document.getElementById('quantityInput' + assetId);
+      let quantity = parseInt(quantityInput.value) || 0;
+      quantity++;
+      quantityInput.value = quantity;
+    }
+    
+    // Decrement quantity
+    function decrementQuantity(assetId) {
+      const quantityInput = document.getElementById('quantityInput' + assetId);
+      let quantity = parseInt(quantityInput.value) || 0;
+      if (quantity > 0) {
+        quantity--;
+        quantityInput.value = quantity;
+      }
+    }
+    
+    // Confirm deletion
+    function confirmDelete(assetId) {
+      const quantityInput = document.getElementById('quantityInput' + assetId);
+      const quantity = parseInt(quantityInput.value) || 0;
+      
+      if (quantity === 0) {
+        if (confirm('Quantity is 0. Do you want to remove this assignment?')) {
+          document.getElementById('delete-form-' + assetId).submit();
+        }
+      } else {
+        // Submit the form normally
+        const form = quantityInput.closest('form');
+        form.submit();
+      }
+    }
+    
+    // Set current month as default for assignment form
+    document.addEventListener('DOMContentLoaded', function() {
+      const monthInput = document.getElementById('assignmentMonth');
+      if (monthInput) {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        monthInput.value = `${year}-${month}`;
+      }
+    });
+  </script>
+</body>
+</html>
