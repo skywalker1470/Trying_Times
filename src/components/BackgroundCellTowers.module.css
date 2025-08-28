@@ -1,0 +1,40 @@
+.background {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff; 
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tower {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.25s ease;
+  color: #003366; /* Deep blue */
+  filter: drop-shadow(0 4px 10px #003366); 
+}
+
+
+/* Jiggle animation on hover */
+.tower:hover {
+  animation: jiggle 0.35s ease-in-out infinite;
+}
+
+/* Jiggle keyframe animation */
+@keyframes jiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+  75% {
+    transform: rotate(-6deg);
+  }
+}
